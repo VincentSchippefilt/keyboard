@@ -53,6 +53,23 @@
         };
     };
 
+    combos {
+        compatible = "zmk,combos";
+
+
+        // D+F --> ctrl + command (meta) + left --> stack left
+        align_left {
+            bindings = <&kp LC(LG(LEFT_ARROW))>;
+            key-positions = <27 28>;
+        };
+
+        // J+K --> ctrl + command (meta) + right --> stack right
+        align_right {
+            bindings = <&kp LC(LG(RIGHT_ARROW))>;
+            key-positions = <31 32>;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
