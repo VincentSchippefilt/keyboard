@@ -56,14 +56,15 @@
     combos {
         compatible = "zmk,combos";
 
-
         // D+F --> ctrl + command (meta) + left --> stack left
+
         align_left {
             bindings = <&kp LC(LG(LEFT_ARROW))>;
             key-positions = <27 28>;
         };
 
         // J+K --> ctrl + command (meta) + right --> stack right
+
         align_right {
             bindings = <&kp LC(LG(RIGHT_ARROW))>;
             key-positions = <31 32>;
@@ -84,11 +85,11 @@
             //               | GUI | ALT  | CTRL | LOWER|  ENTER |  | SPACE | RAISE| CTRL  | ALT   | GUI  |
 
             bindings = <
-&kp FR_AT                      &kp N1    &kp N2    &kp N3    &kp N4     &kp N5                                               &kp N6                   &kp N7        &kp N8     &kp N9      &kp NUMBER_0  &kp FR_RPAR
-&kp ESCAPE                     &kp FR_A  &kp FR_Z  &kp FR_E  &kp FR_R   &kp FR_T                                             &kp FR_Y                 &kp FR_U      &kp FR_I   &kp FR_O    &kp FR_P      &kp BSPC
-&kp TAB                        &kp FR_Q  &kp FR_S  &kp FR_D  &kp FR_F   &kp FR_G                                             &kp FR_H                 &kp FR_J      &kp FR_K   &kp FR_L    &kp FR_M      &kp FR_MINUS
-&hold_tap LEFT_SHIFT CAPSLOCK  &kp FR_W  &kp FR_X  &kp FR_C  &kp FR_V   &kp FR_B                 &kp C_MUTE    &kp C_PLAY    &kp FR_N                 &kp FR_COMMA  &kp COMMA  &kp PERIOD  &kp FSLH      &kp RSHFT
-                                         &kp LGUI  &kp LALT  &kp LCTRL  &layer_hold_tap LOWER 1  &kp RET       &kp FR_SPACE  &layer_hold_tap RAISE 2  &kp RCTRL     &kp RALT   &kp RGUI
+&kp FR_AT                  &kp N1    &kp N2    &kp N3    &kp N4     &kp N5                                               &kp N6                   &kp N7        &kp N8     &kp N9      &kp NUMBER_0  &kp FR_RPAR
+&kp ESCAPE                 &kp FR_A  &kp FR_Z  &kp FR_E  &kp FR_R   &kp FR_T                                             &kp FR_Y                 &kp FR_U      &kp FR_I   &kp FR_O    &kp FR_P      &kp BSPC
+&kp TAB                    &kp FR_Q  &kp FR_S  &kp FR_D  &kp FR_F   &kp FR_G                                             &kp FR_H                 &kp FR_J      &kp FR_K   &kp FR_L    &kp FR_M      &kp FR_MINUS
+&hold_tap LEFT_SHIFT CAPS  &kp FR_W  &kp FR_X  &kp FR_C  &kp FR_V   &kp FR_B                 &kp C_MUTE    &kp C_PLAY    &kp FR_N                 &kp FR_COMMA  &kp COMMA  &kp PERIOD  &kp FSLH      &kp RSHFT
+                                     &kp LGUI  &kp LALT  &kp LCTRL  &layer_hold_tap LOWER 1  &kp RET       &kp FR_SPACE  &layer_hold_tap RAISE 2  &kp RCTRL     &kp RALT   &kp RGUI
             >;
 
             sensor-bindings =
@@ -107,11 +108,11 @@
             //               |     |      |      |      |        |  |       |      |       |       |      |
 
             bindings = <
-&trans  &kp F1  &kp F2  &kp F3  &kp F4  &kp F5                    &kp F6          &kp F7       &kp F8       &kp F9            &kp F10       &kp F11
-&trans  &trans  &trans  &trans  &trans  &trans                    &kp FR_PERCENT  &kp FR_LBKT  &kp FR_RBKT  &kp FR_PLUS       &kp FR_MINUS  &kp F12
-&trans  &trans  &trans  &trans  &trans  &trans                    &kp FR_DOLLAR   &kp FR_LPAR  &kp FR_RPAR  &kp FR_AMPERSAND  &kp FR_PIPE   &kp FR_BSLH
-&trans  &trans  &trans  &trans  &trans  &trans  &trans    &trans  &kp FR_UNDER    &kp FR_LBRC  &kp FR_RBRC  &kp FR_ASTRK      &kp FR_SLASH  &kp FR_TILDE
-                &trans  &trans  &trans  &trans  &trans    &trans  &trans          &trans       &trans       &trans
+&trans  &kp F1  &kp F2  &kp F3        &kp F4         &kp F5                          &kp F6          &kp F7       &kp F8       &kp F9            &kp F10       &kp F11
+&trans  &trans  &trans  &kp FR_ACUTE  &kp FR_CARET   &kp FR_GRAVE                    &kp FR_PERCENT  &kp FR_LBKT  &kp FR_RBKT  &kp FR_PLUS       &kp FR_MINUS  &kp F12
+&trans  &trans  &trans  &trans        &kp FR_UMLAUT  &trans                          &kp FR_DOLLAR   &kp FR_LPAR  &kp FR_RPAR  &kp FR_AMPERSAND  &kp FR_PIPE   &kp FR_BSLH
+&trans  &trans  &trans  &trans        &trans         &trans        &trans    &trans  &kp FR_UNDER    &kp FR_LBRC  &kp FR_RBRC  &kp FR_ASTRK      &kp FR_SLASH  &kp FR_TILDE
+                &trans  &trans        &trans         &trans        &trans    &trans  &trans          &trans       &trans       &trans
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp C_PREV C_NEXT>;
@@ -131,7 +132,7 @@
 &trans  &trans      &trans     &trans       &trans       &trans                            &trans     &trans     &trans    &trans     &trans  &trans
 &trans  &kp INS     &kp PSCRN  &kp K_CMENU  &trans       &trans                            &kp PG_UP  &mkp RCLK  &kp UP    &trans     &trans  &kp DEL
 &trans  &kp LALT    &kp LCTRL  &kp LSHFT    &trans       &kp CLCK                          &kp PG_DN  &kp LEFT   &kp DOWN  &kp RIGHT  &trans  &trans
-&trans  &kp K_UNDO  &kp K_CUT  &kp K_COPY   &kp K_PASTE  &studio_unlock  &trans    &trans  &trans     &trans     &trans    &trans     &trans  &trans
+&trans  &kp K_UNDO  &kp K_CUT  &kp K_COPY   &kp K_PASTE  &studio_unlock  &trans    &trans  &trans     &kp HOME   &kp END   &trans     &trans  &trans
                     &trans     &trans       &trans       &trans          &trans    &trans  &trans     &trans     &trans    &trans
             >;
 
@@ -152,7 +153,7 @@
 &ext_power EP_TOG  &rgb_ug RGB_HUD  &rgb_ug RGB_HUI  &rgb_ug RGB_SAD  &rgb_ug RGB_SAI  &rgb_ug RGB_EFF                            &none  &none  &none  &none  &none  &none
 &none              &rgb_ug RGB_BRD  &rgb_ug RGB_BRI  &none            &none            &none                                      &none  &none  &none  &none  &none  &none
 &none              &none            &none            &none            &none            &none            &rgb_ug RGB_TOG    &none  &none  &none  &none  &none  &none  &none
-                                    &none            &none            &none            &none            &none              &none  &none  &none  &none  &none
+                                    &none            &none            &none            &to 0            &none              &none  &to 0  &none  &none  &none
             >;
 
             sensor-bindings = <&inc_dec_kp C_BRI_INC C_BRI_DEC>;
