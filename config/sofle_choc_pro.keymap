@@ -33,16 +33,18 @@
     };
 
     behaviors {
+        // shift tap becomes caps word
         hold_tap: hold_tap {
             compatible = "zmk,behavior-hold-tap";
             label = "HOLD_TAP";
-            bindings = <&kp>, <&kp>;
+            bindings = <&kp>, <&caps_word>;
 
             #binding-cells = <2>;
             flavor = "tap-preferred";
             tapping-term-ms = <200>;
         };
-
+ 
+        // layer hold tap becomes layer when held, toggle when tapped
         layer_hold_tap: layer_hold_tap {
             compatible = "zmk,behavior-hold-tap";
             label = "LAYER_HOLD_TAP";
@@ -94,7 +96,7 @@
 
             sensor-bindings =
                 <&inc_dec_kp LEFT RIGHT>,
-                <&inc_dec_kp C_PREV C_NEXT>;
+                <&inc_dec_kp C_VOLUME_DOWN C_VOLUME_UP>;
         };
 
         lower_layer {
@@ -110,7 +112,7 @@
             bindings = <
 &trans  &kp F1  &kp F2  &kp F3        &kp F4         &kp F5                          &kp F6          &kp F7       &kp F8       &kp F9            &kp F10       &kp F11
 &trans  &trans  &trans  &kp FR_ACUTE  &kp FR_CARET   &kp FR_GRAVE                    &kp FR_PERCENT  &kp FR_LBKT  &kp FR_RBKT  &kp FR_PLUS       &kp FR_MINUS  &kp F12
-&trans  &trans  &trans  &trans        &kp FR_UMLAUT  &trans                          &kp FR_DOLLAR   &kp FR_LPAR  &kp FR_RPAR  &kp FR_AMPERSAND  &kp FR_PIPE   &kp FR_BSLH
+&trans  &trans  &trans  &kp FR_LT     &kp FR_UMLAUT  &kp FR_GT                       &kp FR_DOLLAR   &kp FR_LPAR  &kp FR_RPAR  &kp FR_AMPERSAND  &kp FR_PIPE   &kp FR_BSLH
 &trans  &trans  &trans  &trans        &trans         &trans        &trans    &trans  &kp FR_UNDER    &kp FR_LBRC  &kp FR_RBRC  &kp FR_ASTRK      &kp FR_SLASH  &kp FR_TILDE
                 &trans  &trans        &trans         &trans        &trans    &trans  &trans          &trans       &trans       &trans
             >;
