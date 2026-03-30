@@ -20,6 +20,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/wpm_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
+#include <zmk/events/caps_word_state_changed.h>
 #include <zmk/usb.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
@@ -189,6 +190,16 @@ static void draw_bottom(lv_obj_t *widget, lv_color_t cbuf[], const struct status
         lv_canvas_draw_text(canvas, 0, 5, 68, &label_dsc, state->layer_label);
     }
 
+    // Draw caps word indicator
+    if (state->caps_word_active) {
+        lv_draw_rect_dsc_t rect_white_dsc;
+        init_rect_dsc(&rect_white_dsc, LVGL_FOREGROUND);
+        lv_draw_label_dsc_t label_dsc_inv;
+        init_label_dsc(&label_dsc_inv, LVGL_BACKGROUND, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_rect(canvas, 8, 40, 52, 20, &rect_white_dsc);
+        lv_canvas_draw_text(canvas, 8, 43, 52, &label_dsc_inv, "CAPS");
+    }
+
     // Rotate canvas
     rotate_canvas(canvas, cbuf);
 }
@@ -309,6 +320,30 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_stat
                             wpm_status_get_state)
 ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
 
+struct caps_word_status_state {
+    bool active;
+};
+
+static void set_caps_word_status(struct zmk_widget_status *widget,
+                                 struct caps_word_status_state state) {
+    widget->state.caps_word_active = state.active;
+    draw_bottom(widget->obj, widget->cbuf3, &widget->state);
+}
+
+static void caps_word_status_update_cb(struct caps_word_status_state state) {
+    struct zmk_widget_status *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_caps_word_status(widget, state); }
+}
+
+static struct caps_word_status_state caps_word_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_caps_word_state_changed *ev = as_zmk_caps_word_state_changed(eh);
+    return (struct caps_word_status_state){.active = ev->active};
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_caps_word_status, struct caps_word_status_state,
+                             caps_word_status_update_cb, caps_word_status_get_state)
+ZMK_SUBSCRIPTION(widget_caps_word_status, zmk_caps_word_state_changed);
+
 #ifdef CONFIG_NICE_VIEW_DISP_ROTATE_180 // sets positions for default and flipped canvases
 int top_pos = 0;
 int middle_pos = 68;
@@ -337,6 +372,7 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     widget_output_status_init();
     widget_layer_status_init();
     widget_wpm_status_init();
+    widget_caps_word_status_init();
 
     return 0;
 }
