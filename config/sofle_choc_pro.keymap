@@ -20,10 +20,6 @@
 #define RAISE 2
 #define ADJUST 3
 
-// Adapt the caps word behavior to work with the Belgian layout, which has the semicolon and M keys in different positions compared to the US layout. 
-&caps_word {
-    continue-list = <UNDERSCORE BACKSPACE DELETE SEMICOLON M>;
-};
 
 / {
     // Activate ADJUST layer by pressing raise and lower
