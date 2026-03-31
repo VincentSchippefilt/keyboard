@@ -13,5 +13,7 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_DISP_WIDGET_STATUS)
 endif()
 
 if(CONFIG_ZMK_RGB_UNDERGLOW)
-  zephyr_library_sources(layer_rgb.c)
+  if(NOT CONFIG_ZMK_SPLIT OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    zephyr_library_sources(layer_rgb.c)
+  endif()
 endif()
