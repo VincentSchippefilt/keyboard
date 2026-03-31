@@ -46,9 +46,11 @@ static int layer_rgb_listener(const zmk_event_t *eh) {
     }
 
     if (symbol_active && !nav_active) {
+        zmk_rgb_underglow_select_effect(0); // solid
         zmk_rgb_underglow_set_hsb(SYMBOL_COLOR);
         zmk_rgb_underglow_on();
     } else if (nav_active && !symbol_active) {
+        zmk_rgb_underglow_select_effect(0); // solid
         zmk_rgb_underglow_set_hsb(NAV_COLOR);
         zmk_rgb_underglow_on();
     } else if (!symbol_active && !nav_active) {
