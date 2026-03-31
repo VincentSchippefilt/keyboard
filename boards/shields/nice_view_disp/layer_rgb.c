@@ -24,7 +24,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 static void invoke_rgb(uint32_t cmd, uint32_t param) {
     struct zmk_behavior_binding binding = {
-        .behavior_dev = "rgb_underglow",
+        .behavior_dev = "rgb_ug",
         .param1 = cmd,
         .param2 = param,
     };
