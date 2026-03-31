@@ -1,5 +1,7 @@
 /*
- * Layer RGB indicator.
+ * Layer RGB indicator — uses behavior invocation so BEHAVIOR_LOCALITY_GLOBAL
+ * broadcasts to the peripheral half automatically.
+ *
  * Symbol layer (1) → green, Nav layer (2) → blue.
  * On return to base: turns off if RGB was off before, otherwise leaves it on.
  */
@@ -8,18 +10,30 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+#include <zmk/behavior.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/rgb_underglow.h>
+#include <dt-bindings/zmk/rgb.h>
 
 #define SYMBOL_LAYER 1
 #define NAV_LAYER    2
 
-// Brightness matches CONFIG_ZMK_RGB_UNDERGLOW_BRT_MAX = 20
-#define LAYER_RGB_BRT 20
+#define SYMBOL_HSB RGB_COLOR_HSB_VAL(120, 100, 20) // green
+#define NAV_HSB    RGB_COLOR_HSB_VAL(240, 100, 20) // blue
 
-static const struct zmk_led_hsb SYMBOL_COLOR = {.h = 120, .s = 100, .b = LAYER_RGB_BRT}; // green
-static const struct zmk_led_hsb NAV_COLOR    = {.h = 240, .s = 100, .b = LAYER_RGB_BRT}; // blue
+static void invoke_rgb(uint32_t cmd, uint32_t param) {
+    struct zmk_behavior_binding binding = {
+        .behavior_dev = "RGB_UNDERGLOW",
+        .param1 = cmd,
+        .param2 = param,
+    };
+    struct zmk_behavior_binding_event event = {
+        .position = 0,
+        .timestamp = k_uptime_get(),
+    };
+    zmk_behavior_invoke_binding(&binding, event, true);
+}
 
 static bool symbol_active = false;
 static bool nav_active    = false;
@@ -41,26 +55,22 @@ static int layer_rgb_listener(const zmk_event_t *eh) {
     bool any_now_active = symbol_active || nav_active;
 
     if (!any_was_active && any_now_active) {
-        // First indicator layer just activated — save RGB on/off state
         zmk_rgb_underglow_get_state(&was_on);
     }
 
     if (symbol_active && !nav_active) {
-        zmk_rgb_underglow_select_effect(0); // solid
-        zmk_rgb_underglow_set_hsb(SYMBOL_COLOR);
-        zmk_rgb_underglow_on();
+        invoke_rgb(RGB_EFS_CMD, 0); // solid effect
+        invoke_rgb(RGB_COLOR_HSB_CMD, SYMBOL_HSB);
+        invoke_rgb(RGB_ON_CMD, 0);
     } else if (nav_active && !symbol_active) {
-        zmk_rgb_underglow_select_effect(0); // solid
-        zmk_rgb_underglow_set_hsb(NAV_COLOR);
-        zmk_rgb_underglow_on();
+        invoke_rgb(RGB_EFS_CMD, 0); // solid effect
+        invoke_rgb(RGB_COLOR_HSB_CMD, NAV_HSB);
+        invoke_rgb(RGB_ON_CMD, 0);
     } else if (!symbol_active && !nav_active) {
-        // Back to base layer
         if (!was_on) {
-            zmk_rgb_underglow_off();
+            invoke_rgb(RGB_OFF_CMD, 0);
         }
-        // If RGB was already on: leave it on (no color restoration)
     }
-    // Both active (ADJUST layer): keep current layer color, no change
 
     return ZMK_EV_EVENT_BUBBLE;
 }
