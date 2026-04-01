@@ -18,6 +18,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/events/split_peripheral_status_changed.h>
+#include <zmk/events/activity_state_changed.h>
 #include <zmk/usb.h>
 #include <zmk/ble.h>
 
@@ -49,6 +50,12 @@ static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_st
     // Draw output status
     lv_canvas_draw_text(canvas, 0, 0, CANVAS_SIZE, &label_dsc,
                         state->connected ? LV_SYMBOL_WIFI : LV_SYMBOL_CLOSE);
+
+    if (state->idle) {
+        lv_draw_label_dsc_t label_dsc_zzz;
+        init_label_dsc(&label_dsc_zzz, LVGL_FOREGROUND, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 28, 68, &label_dsc_zzz, "ZZZ");
+    }
 
     // Rotate canvas
     rotate_canvas(canvas, cbuf);
@@ -107,6 +114,37 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_s
                             output_status_update_cb, get_state)
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
+struct activity_status_state {
+    bool idle;
+};
+
+static void set_activity_status(struct zmk_widget_status *widget,
+                                struct activity_status_state state) {
+    widget->state.idle = state.idle;
+    if (state.idle) {
+        lv_obj_add_flag(widget->art, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_clear_flag(widget->art, LV_OBJ_FLAG_HIDDEN);
+    }
+    draw_top(widget->obj, widget->cbuf, &widget->state);
+}
+
+static void activity_status_update_cb(struct activity_status_state state) {
+    struct zmk_widget_status *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_activity_status(widget, state); }
+}
+
+static struct activity_status_state activity_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    return (struct activity_status_state){
+        .idle = (ev != NULL) ? ev->state != ZMK_ACTIVITY_ACTIVE : false,
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_activity_status, struct activity_status_state,
+                            activity_status_update_cb, activity_status_get_state)
+ZMK_SUBSCRIPTION(widget_activity_status, zmk_activity_state_changed);
+
 #ifdef CONFIG_NICE_VIEW_DISP_ROTATE_180 // sets positions for default and flipped canvases
 int art_pos = 20;
 int top_pos = 0;
@@ -126,10 +164,12 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     bool random = sys_rand32_get() & 1;
     lv_img_set_src(art, random ? &balloon : &mountain);
     lv_obj_align(art, LV_ALIGN_TOP_LEFT, art_pos, 0);
+    widget->art = art;
 
     sys_slist_append(&widgets, &widget->node);
     widget_battery_status_init();
     widget_peripheral_status_init();
+    widget_activity_status_init();
 
     return 0;
 }
