@@ -50,6 +50,19 @@ static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_st
     lv_canvas_draw_text(canvas, 0, 0, CANVAS_SIZE, &label_dsc,
                         state->connected ? LV_SYMBOL_WIFI : LV_SYMBOL_CLOSE);
 
+    if (state->sleeping) {
+        lv_draw_label_dsc_t label_dsc_sleep;
+        init_label_dsc(&label_dsc_sleep, LVGL_FOREGROUND, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 20, 68, &label_dsc_sleep, LV_SYMBOL_POWER);
+        lv_draw_label_dsc_t label_dsc_off;
+        init_label_dsc(&label_dsc_off, LVGL_FOREGROUND, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 40, 68, &label_dsc_off, "OFF");
+    } else if (state->idle) {
+        lv_draw_label_dsc_t label_dsc_zzz;
+        init_label_dsc(&label_dsc_zzz, LVGL_FOREGROUND, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 28, 68, &label_dsc_zzz, "ZZZ");
+    }
+
     // Rotate canvas
     rotate_canvas(canvas, cbuf);
 }
@@ -106,6 +119,41 @@ static void output_status_update_cb(struct peripheral_status_state state) {
 ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_state,
                             output_status_update_cb, get_state)
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
+
+struct activity_status_state {
+    bool idle;
+    bool sleeping;
+};
+
+static void set_activity_status(struct zmk_widget_status *widget,
+                                struct activity_status_state state) {
+    widget->state.idle = state.idle;
+    widget->state.sleeping = state.sleeping;
+    if (state.idle) {
+        lv_obj_add_flag(widget->art, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_clear_flag(widget->art, LV_OBJ_FLAG_HIDDEN);
+    }
+    draw_top(widget->obj, widget->cbuf, &widget->state);
+}
+
+static void activity_status_update_cb(struct activity_status_state state) {
+    struct zmk_widget_status *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_activity_status(widget, state); }
+}
+
+static struct activity_status_state activity_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    enum zmk_activity_state act = (ev != NULL) ? ev->state : ZMK_ACTIVITY_ACTIVE;
+    return (struct activity_status_state){
+        .idle = act != ZMK_ACTIVITY_ACTIVE,
+        .sleeping = act == ZMK_ACTIVITY_SLEEP,
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_activity_status, struct activity_status_state,
+                            activity_status_update_cb, activity_status_get_state)
+ZMK_SUBSCRIPTION(widget_activity_status, zmk_activity_state_changed);
 
 #ifdef CONFIG_NICE_VIEW_DISP_ROTATE_180 // sets positions for default and flipped canvases
 int art_pos = 20;

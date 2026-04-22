@@ -86,40 +86,53 @@ static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_st
 
     lv_canvas_draw_text(canvas, 0, 0, CANVAS_SIZE, &label_dsc, output_text);
 
-    // Draw WPM
-    lv_canvas_draw_rect(canvas, 0, 21, 68, 42, &rect_white_dsc);
-    lv_canvas_draw_rect(canvas, 1, 22, 66, 40, &rect_black_dsc);
+    if (state->sleeping) {
+        lv_draw_label_dsc_t label_dsc_sleep;
+        init_label_dsc(&label_dsc_sleep, LVGL_FOREGROUND, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 20, 68, &label_dsc_sleep, LV_SYMBOL_POWER);
+        lv_draw_label_dsc_t label_dsc_off;
+        init_label_dsc(&label_dsc_off, LVGL_FOREGROUND, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 40, 68, &label_dsc_off, "OFF");
+    } else if (state->idle) {
+        lv_draw_label_dsc_t label_dsc_zzz;
+        init_label_dsc(&label_dsc_zzz, LVGL_FOREGROUND, &lv_font_montserrat_18, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 28, 68, &label_dsc_zzz, "ZZZ");
+    } else {
+        // Draw WPM
+        lv_canvas_draw_rect(canvas, 0, 21, 68, 42, &rect_white_dsc);
+        lv_canvas_draw_rect(canvas, 1, 22, 66, 40, &rect_black_dsc);
 
-    char wpm_text[6] = {};
-    snprintf(wpm_text, sizeof(wpm_text), "%d", state->wpm[9]);
-    lv_canvas_draw_text(canvas, 42, 52, 24, &label_dsc_wpm, wpm_text);
+        char wpm_text[6] = {};
+        snprintf(wpm_text, sizeof(wpm_text), "%d", state->wpm[9]);
+        lv_canvas_draw_text(canvas, 42, 52, 24, &label_dsc_wpm, wpm_text);
 
-    int max = 0;
-    int min = 256;
+        int max = 0;
+        int min = 256;
 
-    for (int i = 0; i < 10; i++) {
-        if (state->wpm[i] > max) {
-            max = state->wpm[i];
+        for (int i = 0; i < 10; i++) {
+            if (state->wpm[i] > max) {
+                max = state->wpm[i];
+            }
+            if (state->wpm[i] < min) {
+                min = state->wpm[i];
+            }
         }
-        if (state->wpm[i] < min) {
-            min = state->wpm[i];
+
+        int range = max - min;
+        if (range == 0) {
+            range = 1;
         }
-    }
 
-    int range = max - min;
-    if (range == 0) {
-        range = 1;
-    }
+        lv_point_t points[10];
+        for (int i = 0; i < 10; i++) {
+            points[i].x = 2 + i * 7;
+            points[i].y = 60 - (state->wpm[i] - min) * 36 / range;
+        }
+        lv_canvas_draw_line(canvas, points, 10, &line_dsc);
 
-    lv_point_t points[10];
-    for (int i = 0; i < 10; i++) {
-        points[i].x = 2 + i * 7;
-        points[i].y = 60 - (state->wpm[i] - min) * 36 / range;
+        // Rotate canvas
+        rotate_canvas(canvas, cbuf);
     }
-    lv_canvas_draw_line(canvas, points, 10, &line_dsc);
-
-    // Rotate canvas
-    rotate_canvas(canvas, cbuf);
 }
 
 static void draw_middle(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
@@ -308,6 +321,38 @@ struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
 ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb,
                             wpm_status_get_state)
 ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
+
+struct activity_status_state {
+    bool idle;
+    bool sleeping;
+};
+
+static void set_activity_status(struct zmk_widget_status *widget,
+                                struct activity_status_state state) {
+    widget->state.idle = state.idle;
+    widget->state.sleeping = state.sleeping;
+    draw_top(widget->obj, widget->cbuf, &widget->state);
+    draw_middle(widget->obj, widget->cbuf2, &widget->state);
+    draw_bottom(widget->obj, widget->cbuf3, &widget->state);
+}
+
+static void activity_status_update_cb(struct activity_status_state state) {
+    struct zmk_widget_status *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_activity_status(widget, state); }
+}
+
+static struct activity_status_state activity_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    enum zmk_activity_state act = (ev != NULL) ? ev->state : ZMK_ACTIVITY_ACTIVE;
+    return (struct activity_status_state){
+        .idle = act != ZMK_ACTIVITY_ACTIVE,
+        .sleeping = act == ZMK_ACTIVITY_SLEEP,
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_activity_status, struct activity_status_state,
+                            activity_status_update_cb, activity_status_get_state)
+ZMK_SUBSCRIPTION(widget_activity_status, zmk_activity_state_changed);
 
 #ifdef CONFIG_NICE_VIEW_DISP_ROTATE_180 // sets positions for default and flipped canvases
 int top_pos = 0;
