@@ -87,7 +87,14 @@ static void draw_top(lv_obj_t *widget, lv_color_t cbuf[], const struct status_st
 
     lv_canvas_draw_text(canvas, 0, 0, CANVAS_SIZE, &label_dsc, output_text);
 
-    if (state->idle) {
+    if (state->sleeping) {
+        lv_draw_label_dsc_t label_dsc_sleep;
+        init_label_dsc(&label_dsc_sleep, LVGL_FOREGROUND, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 20, 68, &label_dsc_sleep, LV_SYMBOL_POWER);
+        lv_draw_label_dsc_t label_dsc_off;
+        init_label_dsc(&label_dsc_off, LVGL_FOREGROUND, &lv_font_montserrat_16, LV_TEXT_ALIGN_CENTER);
+        lv_canvas_draw_text(canvas, 0, 40, 68, &label_dsc_off, "OFF");
+    } else if (state->idle) {
         lv_draw_label_dsc_t label_dsc_zzz;
         init_label_dsc(&label_dsc_zzz, LVGL_FOREGROUND, &lv_font_montserrat_18, LV_TEXT_ALIGN_CENTER);
         lv_canvas_draw_text(canvas, 0, 28, 68, &label_dsc_zzz, "ZZZ");
@@ -328,11 +335,13 @@ ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
 
 struct activity_status_state {
     bool idle;
+    bool sleeping;
 };
 
 static void set_activity_status(struct zmk_widget_status *widget,
                                 struct activity_status_state state) {
     widget->state.idle = state.idle;
+    widget->state.sleeping = state.sleeping;
     draw_top(widget->obj, widget->cbuf, &widget->state);
     draw_middle(widget->obj, widget->cbuf2, &widget->state);
     draw_bottom(widget->obj, widget->cbuf3, &widget->state);
@@ -345,8 +354,10 @@ static void activity_status_update_cb(struct activity_status_state state) {
 
 static struct activity_status_state activity_status_get_state(const zmk_event_t *eh) {
     const struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
+    enum zmk_activity_state act = (ev != NULL) ? ev->state : ZMK_ACTIVITY_ACTIVE;
     return (struct activity_status_state){
-        .idle = (ev != NULL) ? ev->state != ZMK_ACTIVITY_ACTIVE : false,
+        .idle = act != ZMK_ACTIVITY_ACTIVE,
+        .sleeping = act == ZMK_ACTIVITY_SLEEP,
     };
 }
 
