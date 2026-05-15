@@ -12,7 +12,6 @@
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/ext_power.h>
 #include <dt-bindings/zmk/keys.h>
-#include <dt-bindings/zmk/pointing.h>
 #include <dt-bindings/zmk/rgb.h>
 
 #define BASE 0
@@ -114,11 +113,11 @@
             //               |     |      |      |      |        |  |       |      |       |       |      |
 
             bindings = <
-&trans  &kp F1  &kp F2  &kp F3        &kp F4         &kp F5                          &kp F6          &kp F7       &kp F8       &kp F9            &kp F10       &kp F11
-&trans  &trans  &trans  &kp FR_ACUTE  &kp FR_CARET   &kp FR_GRAVE                    &kp FR_PERCENT  &kp FR_LBKT  &kp FR_RBKT  &kp FR_PLUS       &kp FR_MINUS  &kp F12
-&trans  &trans  &trans  &kp FR_LT     &kp FR_UMLAUT  &kp FR_GT                       &kp FR_DOLLAR   &kp FR_LPAR  &kp FR_RPAR  &kp FR_AMPERSAND  &kp FR_PIPE   &kp FR_BSLH
-&trans  &trans  &trans  &trans        &trans         &trans        &trans    &trans  &kp FR_UNDER    &kp FR_LBRC  &kp FR_RBRC  &kp FR_ASTRK      &kp FR_SLASH  &kp FR_TILDE
-                &trans  &trans        &trans         &trans        &trans    &trans  &trans          &trans       &trans       &trans
+&trans                                  &kp F1  &kp F2  &kp F3        &kp F4         &kp F5                          &kp F6          &kp F7       &kp F8       &kp F9            &kp F10       &kp F11
+&kp C_AC_DESKTOP_SHOW_ALL_WINDOWS       &trans  &trans  &kp FR_ACUTE  &kp FR_CARET   &kp FR_GRAVE                    &kp FR_PERCENT  &kp FR_LBKT  &kp FR_RBKT  &kp FR_PLUS       &kp FR_MINUS  &kp F12
+&kp C_AC_DESKTOP_SHOW_ALL_APPLICATIONS  &trans  &trans  &kp FR_LT     &kp FR_UMLAUT  &kp FR_GT                       &kp FR_DOLLAR   &kp FR_LPAR  &kp FR_RPAR  &kp FR_AMPERSAND  &kp FR_PIPE   &kp FR_BSLH
+&trans                                  &trans  &trans  &trans        &trans         &trans        &trans    &trans  &kp FR_UNDER    &kp FR_LBRC  &kp FR_RBRC  &kp FR_ASTRK      &kp FR_SLASH  &kp FR_TILDE
+                                                &trans  &trans        &trans         &trans        &trans    &trans  &trans          &trans       &trans       &trans
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp C_PREV C_NEXT>;
@@ -135,11 +134,11 @@
             //                |      |       |       |      |      |  |      |      |      |       |      |
 
             bindings = <
-&trans  &trans      &trans     &trans       &trans       &trans                            &trans     &trans     &trans    &trans     &trans  &trans
-&trans  &kp INS     &kp PSCRN  &kp K_CMENU  &trans       &trans                            &kp PG_UP  &mkp RCLK  &kp UP    &trans     &trans  &kp DEL
-&trans  &kp LALT    &kp LCTRL  &kp LSHFT    &trans       &kp CLCK                          &kp PG_DN  &kp LEFT   &kp DOWN  &kp RIGHT  &trans  &trans
-&trans  &kp K_UNDO  &kp K_CUT  &kp K_COPY   &kp K_PASTE  &studio_unlock  &trans    &trans  &trans     &kp HOME   &kp END   &trans     &trans  &trans
-                    &trans     &trans       &trans       &trans          &trans    &trans  &trans     &trans     &trans    &trans
+&trans  &trans      &trans     &trans       &trans       &trans                            &trans     &trans              &trans    &trans     &trans  &trans
+&trans  &kp INS     &kp PSCRN  &kp K_CMENU  &trans       &trans                            &kp PG_UP  &kp K_CONTEXT_MENU  &kp UP    &trans     &trans  &kp DEL
+&trans  &kp LALT    &kp LCTRL  &kp LSHFT    &trans       &kp CLCK                          &kp PG_DN  &kp LEFT            &kp DOWN  &kp RIGHT  &trans  &trans
+&trans  &kp K_UNDO  &kp K_CUT  &kp K_COPY   &kp K_PASTE  &studio_unlock  &trans    &trans  &trans     &kp HOME            &kp END   &trans     &trans  &trans
+                    &trans     &trans       &trans       &trans          &trans    &trans  &trans     &trans              &trans    &trans
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp C_PREV C_NEXT>;
