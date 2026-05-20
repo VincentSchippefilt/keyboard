@@ -5,6 +5,7 @@
 */
 
 #include "keys_fr_belgian.h"
+#include "keys_fr_belgian_linux.h"
 #include <dt-bindings/zmk/hid_usage.h>
 #include <dt-bindings/zmk/hid_usage_pages.h>
 #include <dt-bindings/zmk/modifiers.h>
@@ -14,10 +15,12 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/rgb.h>
 
-#define BASE 0
-#define LOWER 1
-#define RAISE 2
-#define ADJUST 3
+#define BASE        0
+#define LOWER       1
+#define RAISE       2
+#define ADJUST      3
+#define LINUX_BASE  4
+#define LINUX_LOWER 5
 
 &caps_word { continue-list = <UNDERSCORE BACKSPACE DELETE COMMA MINUS>; };
 
@@ -29,6 +32,11 @@
 
         adjust_layer {
             if-layers = <LOWER RAISE>;
+            then-layer = <ADJUST>;
+        };
+
+        linux_adjust_layer {
+            if-layers = <LINUX_LOWER RAISE>;
             then-layer = <ADJUST>;
         };
     };
@@ -61,18 +69,36 @@
     combos {
         compatible = "zmk,combos";
 
-        // D+F --> ctrl + command (meta) + left --> stack left
+        // macOS: D+F --> ctrl + command + left --> window snap left
 
         align_left {
             bindings = <&kp LC(LG(LEFT_ARROW))>;
             key-positions = <27 28>;
+            layers = <BASE LOWER RAISE ADJUST>;
         };
 
-        // J+K --> ctrl + command (meta) + right --> stack right
+        // macOS: J+K --> ctrl + command + right --> window snap right
 
         align_right {
             bindings = <&kp LC(LG(RIGHT_ARROW))>;
             key-positions = <31 32>;
+            layers = <BASE LOWER RAISE ADJUST>;
+        };
+
+        // Linux: D+F --> Super+Left --> window snap left (GNOME/KDE)
+
+        linux_align_left {
+            bindings = <&kp LG(LEFT_ARROW)>;
+            key-positions = <27 28>;
+            layers = <LINUX_BASE LINUX_LOWER RAISE ADJUST>;
+        };
+
+        // Linux: J+K --> Super+Right --> window snap right (GNOME/KDE)
+
+        linux_align_right {
+            bindings = <&kp LG(RIGHT_ARROW)>;
+            key-positions = <31 32>;
+            layers = <LINUX_BASE LINUX_LOWER RAISE ADJUST>;
         };
     };
 
@@ -164,14 +190,42 @@
             sensor-bindings = <&inc_dec_kp C_BRI_INC C_BRI_DEC>;
         };
 
-        layer_4 {
+        // Layer 4: Linux base — activated automatically by profile_layer.c when
+        // BT profile 1 (channel 2) is selected.  Swaps Ctrl↔GUI in the thumb
+        // cluster, points LOWER at the Linux symbol layer (5), keeps RAISE
+        // shared with macOS (navigation keys are identical on both platforms).
+        // Only the @ key and the thumb cluster differ; everything else is &trans
+        // falling through to the macOS base layer underneath.
+
+        linux_base_layer {
+            display-name = "Linux";
             bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  &trans
-                &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans
+&kp FRL_AT  &kp N1  &kp N2  &kp N3  &kp N4  &kp N5                    &kp N6  &kp N7  &kp N8  &kp N9  &kp NUMBER_0  &kp FR_RPAR
+&trans      &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans        &trans
+&trans      &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans        &trans
+&trans      &trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans        &trans
+                    &kp LCTRL  &kp LALT  &kp LGUI  &layer_hold_tap LINUX_LOWER LINUX_LOWER  &kp RET  &kp FR_SPACE  &layer_hold_tap RAISE RAISE  &kp RGUI  &kp RALT  &kp RCTRL
             >;
+            sensor-bindings =
+                <&inc_dec_kp LEFT RIGHT>,
+                <&inc_dec_kp C_VOLUME_DOWN C_VOLUME_UP>;
+        };
+
+        // Layer 5: Linux symbol layer — mirrors the macOS LOWER layer but uses
+        // the correct AltGr combinations for Linux Belgian (FRL_* from
+        // keys_fr_belgian_linux.h).  The two macOS-specific desktop keys are
+        // removed; add Super+key shortcuts for your WM here if needed.
+
+        linux_lower_layer {
+            display-name = "Sym.Lin";
+            bindings = <
+&trans  &kp F1  &kp F2  &kp F3        &kp F4         &kp F5                          &kp F6          &kp F7        &kp F8        &kp F9            &kp F10       &kp F11
+&trans  &trans  &trans  &kp FR_ACUTE  &kp FR_CARET   &kp FR_GRAVE                    &kp FR_PERCENT  &kp FRL_LBKT  &kp FRL_RBKT  &kp FR_PLUS       &kp FR_MINUS  &kp F12
+&trans  &trans  &trans  &kp FR_LT     &kp FR_UMLAUT  &kp FR_GT                       &kp FR_DOLLAR   &kp FR_LPAR   &kp FR_RPAR   &kp FR_AMPERSAND  &kp FRL_PIPE  &kp FRL_BSLH
+&trans  &trans  &trans  &trans        &trans         &trans        &trans    &trans  &kp FR_UNDER    &kp FRL_LBRC  &kp FRL_RBRC  &kp FR_ASTRK      &kp FR_SLASH  &kp FRL_TILDE
+                &trans  &trans        &trans         &trans        &trans    &trans  &trans          &trans        &trans        &trans
+            >;
+            sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP &inc_dec_kp C_PREV C_NEXT>;
         };
     };
 };

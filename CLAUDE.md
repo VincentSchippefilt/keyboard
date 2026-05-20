@@ -13,7 +13,7 @@ Firmware is built automatically by GitHub Actions on every push. To trigger a bu
 - Go to GitHub Actions → "Build ZMK Firmware" → "Run workflow"
 
 The build matrix is defined in [build.yaml](build.yaml) and produces 4 artifacts:
-- Left half + nice_view_disp + studio-rpc-usb-uart
+- Left half + nice_view_disp + studio-rpc-usb-uart (`CONFIG_ZMK_STUDIO=y` on left only)
 - Right half + nice_view_disp + studio-rpc-usb-uart
 - Left half + settings_reset (for resetting BLE bonds)
 - Right half + settings_reset
@@ -24,6 +24,7 @@ There is no local build command — the GitHub Actions workflow ([.github/workfl
 
 - [config/sofle_choc_pro.keymap](config/sofle_choc_pro.keymap) — Main keymap (AZERTY Belgian layout, layers, combos, behaviors)
 - [config/sofle_choc_pro.conf](config/sofle_choc_pro.conf) — ZMK feature flags (mouse emulation, sleep, idle)
+- [config/sofle_choc_pro.json](config/sofle_choc_pro.json) — ZMK Studio physical layout export
 - [config/keys_fr_belgian.h](config/keys_fr_belgian.h) — Custom key definitions for Belgian French characters
 - [config/west.yml](config/west.yml) — ZMK dependency manifest (pins ZMK to v0.3)
 - [boards/arm/sofle_choc_pro/](boards/arm/sofle_choc_pro/) — nRF52840 board definitions (device tree, Kconfig, CMake)
@@ -56,11 +57,48 @@ ADJUST is activated automatically via `conditional_layers` when both LOWER and R
 
 ## Display Shield
 
-The nice!view display has a custom status screen implemented in C under [boards/shields/nice_view_disp/](boards/shields/nice_view_disp/). Key files:
-- `custom_status_screen.c` — Top-level screen layout
-- `widgets/status.c` — Layer name and WPM display
-- `widgets/peripheral_status.c` — Bluetooth and battery status
-- `widgets/bolt.c` / `art.c` — Visual elements
+The nice!view display has a custom status screen implemented in C under [boards/shields/nice_view_disp/](boards/shields/nice_view_disp/).
+
+**Widget layout** (`widgets/status.c`) — three stacked 68×68 LVGL canvases:
+- **Top**: battery level, BT/USB connection icon, WPM graph (or idle/sleep indicator)
+- **Middle**: 5 BT profile circles (active profile filled)
+- **Bottom**: active layer name
+
+Display state reacts to ZMK events via `ZMK_DISPLAY_WIDGET_LISTENER` / `ZMK_SUBSCRIPTION` macros for battery, output, layer, WPM, and activity.
+
+**Additional C modules in the shield:**
+- `layer_rgb.c` — Automatically sets RGB underglow color on layer activation: Symbol (layer 1) → green, Nav (layer 2) → blue. Restores off-state when returning to base if RGB was off before.
+- `sleep_display.c` — Virtual PM device that flushes LVGL to the Sharp LCD before the display is suspended (ensures the sleep indicator is rendered before power-off).
+
+**Display config options** (add to `sofle_choc_pro.conf`):
+- `CONFIG_NICE_VIEW_DISP_ROTATE_180=y` — rotate widget 180°
+- `CONFIG_ZMK_DISPLAY_STATUS_SCREEN_BUILT_IN=y` — use ZMK built-in widget instead of the custom one
+
+## macOS / Linux dual-OS support
+
+BT profile 1 (channel 2, 0-indexed) is the Linux profile. `profile_layer.c` auto-activates layer 4 when that profile is selected and deactivates it otherwise.
+
+| Layer | Name | Active on |
+|-------|------|-----------|
+| 4 | `LINUX_BASE` | Linux — swaps Ctrl↔GUI in thumb cluster, uses `FRL_AT` for `@`, points LOWER at layer 5 |
+| 5 | `LINUX_LOWER` | Linux — same as LOWER but with `FRL_*` symbols from `keys_fr_belgian_linux.h` |
+| 2 | `RAISE` | Shared — navigation and clipboard keys are OS-agnostic |
+| 3 | `ADJUST` | Shared — triggered by holding LOWER+RAISE **or** LINUX_LOWER+RAISE |
+
+**Key differences between macOS and Linux Belgian** (all handled by `keys_fr_belgian_linux.h`):
+
+| Symbol | macOS (`FR_*`) | Linux (`FRL_*`) |
+|--------|---------------|-----------------|
+| `@` | AltGr+µ key | AltGr+é (key 2) |
+| `[` | Left-Alt+Shift+( | AltGr+( (key 5) |
+| `]` | Left-Alt+Shift+) | AltGr+) (key −) |
+| `{` | AltGr+( (key 5) | AltGr+' (key 4) |
+| `}` | AltGr+) (key −) | AltGr+à (key 0) |
+| `\` | AltGr+Shift+> | AltGr+§ (key 6) |
+| `\|` | AltGr+Shift+L | AltGr+& (key 1) |
+| `~` | AltGr+N | AltGr+Shift+é — verify on your distro |
+
+Window-snap combos are restricted by layer: D+F / J+K send `Ctrl+Cmd+←/→` on macOS layers and `Super+←/→` (GNOME/KDE tiling) on Linux layers.
 
 ## ZMK Version
 
