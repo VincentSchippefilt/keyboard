@@ -32,7 +32,7 @@ There is no local build command — the GitHub Actions workflow ([.github/workfl
 
 ## Keymap Architecture
 
-The keymap uses 5 layers (0–4), with layer 4 currently unused:
+The keymap uses 6 layers (0–5); see [macOS / Linux dual-OS support](#macos--linux-dual-os-support) below for layers 4–5:
 
 | Layer | `#define` | `display-name` | Purpose |
 |-------|-----------|----------------|---------|
@@ -40,12 +40,15 @@ The keymap uses 5 layers (0–4), with layer 4 currently unused:
 | 1     | `LOWER`   | "Symbol"       | Symbols, function keys, brackets |
 | 2     | `RAISE`   | "Nav."         | Navigation, mouse buttons, clipboard shortcuts |
 | 3     | `ADJUST`  | "adjust"       | Bluetooth profiles, RGB controls, power |
+| 4     | `LINUX_BASE` | "Linux"     | Linux equivalent of BASE, auto-activated by BT profile |
+| 5     | `LINUX_LOWER` | "Sym.Lin"  | Linux equivalent of LOWER |
 
-ADJUST is activated automatically via `conditional_layers` when both LOWER and RAISE are held simultaneously.
+ADJUST is activated automatically via `conditional_layers` when both LOWER and RAISE are held simultaneously (or LINUX_LOWER and RAISE).
 
 **Custom behaviors:**
 - `hold_tap` (Shift key): hold = Caps Lock, tap = Caps Word
 - `layer_hold_tap`: hold = activate layer (`&mo`), tap = toggle layer (`&tog`)
+- `linux_at_hash`: mod-morph on the Linux `@` key — sends `@` normally, `#` when Shift is held (see dual-OS section)
 
 **Combos:**
 - D+F (positions 27+28) → Stack Left (Ctrl+Cmd+Left, macOS window snapping)
@@ -80,23 +83,27 @@ BT profile 1 (channel 2, 0-indexed) is the Linux profile. `profile_layer.c` auto
 
 | Layer | Name | Active on |
 |-------|------|-----------|
-| 4 | `LINUX_BASE` | Linux — swaps Ctrl↔GUI in thumb cluster, uses `FRL_AT` for `@`, points LOWER at layer 5 |
+| 4 | `LINUX_BASE` | Linux — swaps Ctrl↔GUI in thumb cluster, uses the `linux_at_hash` mod-morph for `@`/`#`, points LOWER at layer 5 |
 | 5 | `LINUX_LOWER` | Linux — same as LOWER but with `FRL_*` symbols from `keys_fr_belgian_linux.h` |
 | 2 | `RAISE` | Shared — navigation and clipboard keys are OS-agnostic |
 | 3 | `ADJUST` | Shared — triggered by holding LOWER+RAISE **or** LINUX_LOWER+RAISE |
 
-**Key differences between macOS and Linux Belgian** (all handled by `keys_fr_belgian_linux.h`):
+**Key differences between macOS and Linux Belgian** (all handled by `keys_fr_belgian_linux.h`), verified against the upstream xkeyboard-config "be" xkb symbols table and confirmed on real Fedora hardware:
 
 | Symbol | macOS (`FR_*`) | Linux (`FRL_*`) |
 |--------|---------------|-----------------|
 | `@` | AltGr+µ key | AltGr+é (key 2) |
-| `[` | Left-Alt+Shift+( | AltGr+( (key 5) |
-| `]` | Left-Alt+Shift+) | AltGr+) (key −) |
-| `{` | AltGr+( (key 5) | AltGr+' (key 4) |
+| `#` | Shift+(the `@` key) | Not reachable via raw modifier math (Shift+AltGr+2 = `⅛` on Linux `be`) — handled by the `linux_at_hash` mod-morph behavior instead, which sends `FRL_AT` normally and `FRL_HASH` (AltGr+key 3) when Shift is held |
+| `[` | Left-Alt+Shift+( | AltGr + physical `[` key |
+| `]` | Left-Alt+Shift+) | AltGr + physical `]` key |
+| `{` | AltGr+( (key 5) | AltGr+è (key 7) |
 | `}` | AltGr+) (key −) | AltGr+à (key 0) |
-| `\` | AltGr+Shift+> | AltGr+§ (key 6) |
+| `\` | AltGr+Shift+> | AltGr + physical `-` key |
 | `\|` | AltGr+Shift+L | AltGr+& (key 1) |
-| `~` | AltGr+N | AltGr+Shift+é — verify on your distro |
+| `~` | AltGr+N | AltGr + physical `/` key — dead key (`dead_tilde`) on Linux, combines with next keystroke; ISO-key position is ambiguous, verify on your distro |
+| `´` | AltGr+Shift+1 | AltGr + physical `;` key — dead key (`dead_acute`) on Linux |
+| `<` | unmodified physical `` ` ``/`~` key | unmodified Non-US-Backslash (ISO 102nd key) |
+| `>` | Shift + physical `` ` ``/`~` key | Shift + Non-US-Backslash (ISO 102nd key) |
 
 Window-snap combos are restricted by layer: D+F / J+K send `Ctrl+Cmd+←/→` on macOS layers and `Super+←/→` (GNOME/KDE tiling) on Linux layers.
 

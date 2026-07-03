@@ -9,9 +9,9 @@
  * correctly on Linux with a Belgian keyboard layout.  All other FR_* symbols
  * from keys_fr_belgian.h are identical on both platforms and can be reused as-is.
  *
- * Verified against the standard X11 xkb "be" layout (Ubuntu / Debian default).
- * If your distro ships a variant layout, test and adjust the positions marked
- * "verify" below.
+ * Verified against the upstream xkeyboard-config "be" (basic) xkb symbols file
+ * (the standard "Belgian" layout on Fedora/Ubuntu/Debian) and confirmed against
+ * live hardware testing on Fedora.
  */
 
 #pragma once
@@ -20,29 +20,41 @@
 #include <dt-bindings/zmk/hid_usage_pages.h>
 #include <dt-bindings/zmk/modifiers.h>
 
-/* @ — AltGr+é  (key 2)    macOS: RA(backslash) */
+/* @ — AltGr+é  (key 2) */
 #define FRL_AT    (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_2_AND_AT)))
 
-/* # — AltGr+"  (key 3)    macOS: LS(RA(backslash)) */
+/* # — AltGr+"  (key 3). Bound via the linux_at_hash mod-morph, not directly. */
 #define FRL_HASH  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_3_AND_HASH)))
 
-/* { — AltGr+'  (key 4)    macOS: RA(key5) */
-#define FRL_LBRC  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_4_AND_DOLLAR)))
+/* { — AltGr+è  (key 7) */
+#define FRL_LBRC  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_7_AND_AMPERSAND)))
 
-/* [ — AltGr+(  (key 5)    macOS: LA(LS(key5)) */
-#define FRL_LBKT  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_5_AND_PERCENT)))
+/* [ — AltGr + physical [ key */
+#define FRL_LBKT  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_LEFT_BRACKET_AND_LEFT_BRACE)))
 
-/* \ — AltGr+§  (key 6)    macOS: RA(LS(period)) */
-#define FRL_BSLH  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_6_AND_CARET)))
+/* ] — AltGr + physical ] key */
+#define FRL_RBKT  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_RIGHT_BRACKET_AND_RIGHT_BRACE)))
 
-/* | — AltGr+&  (key 1)    macOS: RA(LS(L)) */
+/* \ — AltGr + physical - key */
+#define FRL_BSLH  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_MINUS_AND_UNDERSCORE)))
+
+/* | — AltGr+&  (key 1) */
 #define FRL_PIPE  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_1_AND_EXCLAMATION)))
 
-/* } — AltGr+à  (key 0)    macOS: RA(minus) */
+/* } — AltGr+à  (key 0) */
 #define FRL_RBRC  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_0_AND_RIGHT_PARENTHESIS)))
 
-/* ] — AltGr+)  (key -)    macOS: LA(LS(minus)) */
-#define FRL_RBKT  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_MINUS_AND_UNDERSCORE)))
+/* ~ — AltGr + physical / key. Dead key (dead_tilde) on Linux; combines with the
+ * next keystroke, press + Space for a standalone tilde. Sits on an ISO-only
+ * physical position that's ambiguous to map 1:1 from the xkb table — verify on
+ * real hardware and adjust if wrong. */
+#define FRL_TILDE (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_SLASH_AND_QUESTION_MARK)))
 
-/* ~ — AltGr+Shift+é (key 2) — verify on your system */
-#define FRL_TILDE (RA(LS(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_2_AND_AT))))
+/* ´ — AltGr + physical ; key. Dead key (dead_acute) on Linux, same caveat as ~. */
+#define FRL_ACUTE (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_SEMICOLON_AND_COLON)))
+
+/* < — unmodified Non-US-Backslash (ISO 102nd key) */
+#define FRL_LT    (ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_NON_US_BACKSLASH_AND_PIPE))
+
+/* > — Shift + Non-US-Backslash (ISO 102nd key) */
+#define FRL_GT    (LS(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_NON_US_BACKSLASH_AND_PIPE)))

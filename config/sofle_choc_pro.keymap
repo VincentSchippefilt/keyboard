@@ -64,6 +64,18 @@
             #binding-cells = <2>;
             tapping-term-ms = <200>;
         };
+
+        // Linux "be" xkb puts @ and # on different physical keys (unlike macOS,
+        // where # falls out for free as Shift+@-key). This mod-morph reproduces
+        // the macOS two-legend @/# key explicitly on the Linux base layer.
+
+        linux_at_hash: linux_at_hash {
+            compatible = "zmk,behavior-mod-morph";
+            label = "LINUX_AT_HASH";
+            #binding-cells = <0>;
+            bindings = <&kp FRL_AT>, <&kp FRL_HASH>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
     };
 
     combos {
@@ -200,7 +212,7 @@
         linux_base_layer {
             display-name = "Linux";
             bindings = <
-&kp FRL_AT  &kp N1  &kp N2  &kp N3  &kp N4  &kp N5                    &kp N6  &kp N7  &kp N8  &kp N9  &kp NUMBER_0  &kp FR_RPAR
+&linux_at_hash &kp N1  &kp N2  &kp N3  &kp N4  &kp N5                    &kp N6  &kp N7  &kp N8  &kp N9  &kp NUMBER_0  &kp FR_RPAR
 &trans      &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans        &trans
 &trans      &trans  &trans  &trans  &trans  &trans                    &trans  &trans  &trans  &trans  &trans        &trans
 &trans      &trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans        &trans
@@ -220,8 +232,8 @@
             display-name = "Sym.Lin";
             bindings = <
 &trans  &kp F1  &kp F2  &kp F3        &kp F4         &kp F5                          &kp F6          &kp F7        &kp F8        &kp F9            &kp F10       &kp F11
-&trans  &trans  &trans  &kp FR_ACUTE  &kp FR_CARET   &kp FR_GRAVE                    &kp FR_PERCENT  &kp FRL_LBKT  &kp FRL_RBKT  &kp FR_PLUS       &kp FR_MINUS  &kp F12
-&trans  &trans  &trans  &kp FR_LT     &kp FR_UMLAUT  &kp FR_GT                       &kp FR_DOLLAR   &kp FR_LPAR   &kp FR_RPAR   &kp FR_AMPERSAND  &kp FRL_PIPE  &kp FRL_BSLH
+&trans  &trans  &trans  &kp FRL_ACUTE  &kp FR_CARET   &kp FR_GRAVE                    &kp FR_PERCENT  &kp FRL_LBKT  &kp FRL_RBKT  &kp FR_PLUS       &kp FR_MINUS  &kp F12
+&trans  &trans  &trans  &kp FRL_LT     &kp FR_UMLAUT  &kp FRL_GT                      &kp FR_DOLLAR   &kp FR_LPAR   &kp FR_RPAR   &kp FR_AMPERSAND  &kp FRL_PIPE  &kp FRL_BSLH
 &trans  &trans  &trans  &trans        &trans         &trans        &trans    &trans  &kp FR_UNDER    &kp FRL_LBRC  &kp FRL_RBRC  &kp FR_ASTRK      &kp FR_SLASH  &kp FRL_TILDE
                 &trans  &trans        &trans         &trans        &trans    &trans  &trans          &trans        &trans        &trans
             >;
