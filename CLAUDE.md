@@ -104,6 +104,7 @@ BT profile 1 (channel 2, 0-indexed) is the Linux profile. `profile_layer.c` auto
 | `´` | AltGr+Shift+1 | AltGr + physical `;` key — dead key (`dead_acute`) on Linux |
 | `<` | unmodified physical `` ` ``/`~` key | unmodified Non-US-Backslash (ISO 102nd key) |
 | `>` | Shift + physical `` ` ``/`~` key | Shift + Non-US-Backslash (ISO 102nd key) |
+| `` ` `` | unmodified physical `\` key | AltGr + physical `\` key — dead key (`dead_grave`) on Linux; unmodified gives `µ` instead |
 
 Window-snap combos are restricted by layer: D+F / J+K send `Ctrl+Cmd+←/→` on macOS layers and `Super+←/→` (GNOME/KDE tiling) on Linux layers.
 

@@ -58,3 +58,8 @@
 
 /* > — Shift + Non-US-Backslash (ISO 102nd key) */
 #define FRL_GT    (LS(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_NON_US_BACKSLASH_AND_PIPE)))
+
+/* ` — AltGr + physical backslash key. Unmodified gives µ on Linux "be" (that's
+ * a different physical key than macOS uses for `); grave itself is a dead key
+ * (dead_grave) one level up, at AltGr. */
+#define FRL_GRAVE (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_BACKSLASH_AND_PIPE)))
